@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <script type="text/javascript" src="/scripts/vue.min.js"></script>
+	    <script type="text/javascript" src="/scripts/socket.io.slim.js"></script>
+    </head>
+    <body>
+        <div id="home">
+            <div id="landing" v-if="!nameSet">
+                <span>Name: {{playerName}}</span>
+                <input v-model="playerName" />
+                
+                <button v-on:click="start()">Start</button>
+            </div>
+            <div id="main" v-if="nameSet">
+                <h4>{{question}}</h4>
+                <div v-for="answer in answers">
+                    <button v-on:click="sendAnswer(answer.id)">{{answer.answerText}}</button>
+                </div>
+            </div>
+        </div>
+        <script src="scripts/vue/vue_main.js"></script>
+    </body>
+</html>
