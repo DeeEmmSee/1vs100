@@ -28,7 +28,7 @@ const io = require('socket.io').listen(server);
 io.on('connection', function(socket){
 	// On connect	
 	//socket.emit('question', {question: '', answers: []});
-
+	
 	// Events
 	socket.on('answer', function(data) {
 		console.log(data.player + ': ' + data.answer);
@@ -46,6 +46,8 @@ io.on('connection', function(socket){
 	
 	socket.on('start', function(data) {
 		console.log(data.player + " has started");
+		sockets[data.player] = socket;
+
 		LoadQuestions().then(() => {
 
 			var q = {'question': questions[0].questionText, 'answers': answers[questions[0].id]};
@@ -57,33 +59,28 @@ io.on('connection', function(socket){
 		.catch ((err) => {
 			console.log(err);
 		});
-		
     });
 });
 
+var sockets = {};
 var questions = [];
 var answers = {};
 var currentQuestion = {};
+const states = {
+	'WAITING_FOR_PLAYERS': 0,
+	'COUNTDOWN_TO_START': 1,
+	'QUESTION': 2,
+	'ANSWER': 3,
+	'PROCESS_RESULTS': 4,
+	'END_GAME': 5,
+};
+var currentState = states.WAITING_FOR_PLAYERS;
 
-// function Load(){
-// 	// Load Questions
-// 	return new Promise((success, fail) => {
-// 		LoadQuestions().then(() => {
-// 			// close the database connection
-// 			//db.close();
-
-// 			console.log("Got questions and answers");
-// 			console.log(questions);
-// 			console.log(answers);
-
-// 			success();
-// 		})
-// 		.catch((err) => {
-// 			console.log(err);
-// 			fail(err);
-// 		});
-// 	});
-// }
+function SendToAll(command, data) {
+	for (user in sockets) {
+		socket.emit(command, data);
+	}
+}
 
 function LoadQuestions(){
 	return new Promise((success, fail) => {
@@ -168,3 +165,4 @@ function GetAnswers(qIDs){
 		});
 	});
 }
+
